@@ -31,6 +31,7 @@ import GeneratePodcast from "@/components/ui/GeneratePodcast";
 import GenerateThumbnail from "@/components/ui/GenerateThumbnail";
 import { Loader } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
+import { useToast } from "@/hooks/use-toast";
 
 const voiceCategories = ["alloy", "shimmer", "nova", "echo", "fable", "onyx"];
 
@@ -57,6 +58,8 @@ const CreatePodcast = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { toast } = useToast();
+
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,9 +71,19 @@ const CreatePodcast = () => {
 
   // 2. Define a submit handler.
   function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    try {
+      setIsSubmitting(true);
+      if (!audioUrl || !imageUrl || !voiceType) {
+        toast({
+          title: "PLease generate audio and image",
+        });
+        setIsSubmitting(false);
+        throw new Error("PLease generate auido and image");
+      }
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Error", variant: "destructive" });
+    }
   }
 
   return (

@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "www.theinvestorspodcast.com",
       },
+      {
+        protocol: "https",
+        hostname: "third-kingfisher-962.convex.cloud",
+      },
     ],
   },
 };
