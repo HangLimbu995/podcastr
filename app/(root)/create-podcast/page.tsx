@@ -32,6 +32,9 @@ import GenerateThumbnail from "@/components/ui/GenerateThumbnail";
 import { Loader } from "lucide-react";
 import { Id } from "@/convex/_generated/dataModel";
 import { useToast } from "@/hooks/use-toast";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useRouter } from "next/navigation";
 
 const voiceCategories = ["alloy", "shimmer", "nova", "echo", "fable", "onyx"];
 
@@ -41,6 +44,7 @@ const formSchema = z.object({
 });
 
 const CreatePodcast = () => {
+  const router = useRouter();
   const [imagePrompt, setImagePrompt] = useState("");
   const [imageStorageId, setImageStorageId] = useState<Id<"_storage"> | null>(
     null
@@ -58,6 +62,8 @@ const CreatePodcast = () => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const createPodcast = useMutation(api.podcasts.createPodcast);
+
   const { toast } = useToast();
 
   // 1. Define your form.
@@ -70,7 +76,7 @@ const CreatePodcast = () => {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
       if (!audioUrl || !imageUrl || !voiceType) {
@@ -80,6 +86,23 @@ const CreatePodcast = () => {
         setIsSubmitting(false);
         throw new Error("PLease generate auido and image");
       }
+
+      const podcast = await createPodcast({
+        podcastTitle: data.podcastTitle,
+        podcastDescription: data.podcastDescription,
+        audioUrl,
+        imageUrl,
+        voiceType,
+        imagePrompt,
+        voicePrompt,
+        views: 0,
+        audioDuration,
+        audioStorageId: audioStorageId!,
+        imageStorageId: imageStorageId!,
+      });
+      toast({ title: "Podcast Created" });
+      setIsSubmitting(false);
+      router.push("/");
     } catch (error) {
       console.error(error);
       toast({ title: "Error", variant: "destructive" });
