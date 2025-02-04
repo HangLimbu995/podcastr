@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 
 export const getUrl = mutation({
   args: {
@@ -58,5 +58,20 @@ export const createPodcast = mutation({
       authorImageUrl: user[0].imageUrl,
       audioDuration: args.audioDuration,
     });
+  },
+});
+
+export const getTrendingPodcasts = query({
+  handler: async (ctx) => {
+    const podcasts = await ctx.db.query("podcasts").collect();
+
+    return podcasts;
+  },
+});
+
+export const getPodcastById = query({
+  args: { podcastId: v.id("podcasts") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.podcastId);
   },
 });
